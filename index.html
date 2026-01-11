@@ -1,0 +1,2669 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>وزنة مصاريف - نظام إدارة ميزانية الأسرة</title>
+    
+    <!-- Telegram Web App Script -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- html2canvas library for screenshot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #fafbfc;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+            --accent-color: #495057;
+            --accent-light: #6c757d;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --neutral-color: #6c757d;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --spacing-xs: 5px;
+            --spacing-sm: 10px;
+            --spacing-md: 15px;
+            --spacing-lg: 20px;
+            --spacing-xl: 30px;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --border-color: #30363d;
+            --accent-color: #58a6ff;
+            --accent-light: #79c0ff;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            --shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.6);
+        }
+
+        body {
+            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            padding: var(--spacing-lg);
+            color: var(--text-primary);
+            transition: background 0.3s ease, color 0.3s ease;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            line-height: 1.6;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: background 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: var(--spacing-xl);
+            text-align: center;
+            position: relative;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .theme-toggle {
+            position: absolute;
+            left: var(--spacing-xl);
+            top: var(--spacing-xl);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-family: 'Cairo', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-primary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: var(--spacing-sm);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .header p {
+            font-size: 1em;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .tabs {
+            display: flex;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            flex: 1;
+            padding: var(--spacing-md) var(--spacing-lg);
+            text-align: center;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            font-size: 1em;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            font-family: 'Cairo', sans-serif;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+        }
+
+        .tab.active {
+            background: var(--bg-secondary);
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+            padding: var(--spacing-xl);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section {
+            margin-bottom: var(--spacing-xl);
+            background: var(--bg-tertiary);
+            padding: var(--spacing-lg);
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 1.4em;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 2px solid var(--border-color);
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: none;
+            border: 1px solid var(--border-color);
+            margin-bottom: var(--spacing-md);
+        }
+
+        th, td {
+            padding: var(--spacing-md) var(--spacing-sm);
+            text-align: right;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: var(--spacing-md);
+        }
+
+        .category-row {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .category-row td {
+            padding: var(--spacing-md);
+        }
+
+        .subtotal-row {
+            background: #fffbf0;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .subtotal-row td {
+            padding: var(--spacing-md);
+        }
+
+        [data-theme="dark"] .subtotal-row {
+            background: #2d2a1f;
+        }
+
+        .total-row {
+            background: #f0f9f4;
+            font-weight: 600;
+            font-size: 1em;
+            color: var(--success-color);
+        }
+
+        .total-row td {
+            padding: var(--spacing-md);
+        }
+
+        [data-theme="dark"] .total-row {
+            background: #1a2e1f;
+        }
+
+        .grand-total-row {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 1.1em;
+            border-top: 2px solid var(--border-color);
+        }
+
+        .grand-total-row td {
+            padding: var(--spacing-lg) var(--spacing-md);
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.95em;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-family: 'Cairo', sans-serif;
+            transition: all 0.2s ease;
+            min-height: 38px;
+        }
+
+        input[type="number"] {
+            max-width: 150px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        input[type="number"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(73, 80, 87, 0.1);
+        }
+
+        [data-theme="dark"] input[type="number"]:focus, 
+        [data-theme="dark"] input[type="text"]:focus {
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
+        }
+
+        .btn {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .btn-add {
+            background: var(--success-color);
+            color: white;
+            margin: var(--spacing-xs);
+            border-color: var(--success-color);
+        }
+
+        .btn-add:hover {
+            background: #218838;
+            border-color: #218838;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-remove {
+            background: var(--danger-color);
+            color: white;
+            border-color: var(--danger-color);
+        }
+
+        .btn-remove:hover {
+            background: #c82333;
+            border-color: #c82333;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-export {
+            background: var(--accent-color);
+            color: white;
+            padding: var(--spacing-md) var(--spacing-xl);
+            font-size: 1em;
+            margin: var(--spacing-lg) auto;
+            display: block;
+            border-color: var(--accent-color);
+        }
+
+        .btn-export:hover:not(:disabled) {
+            background: var(--text-primary);
+            border-color: var(--text-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-export:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-indicator {
+            text-align: center;
+            padding: var(--spacing-xl);
+            border-radius: 6px;
+            margin: var(--spacing-lg) 0;
+            font-size: 1.2em;
+            font-weight: 600;
+            box-shadow: none;
+            transition: all 0.3s ease;
+            border: 2px solid var(--border-color);
+            line-height: 1.8;
+        }
+
+        .status-excellent {
+            background: #d4edda;
+            color: #155724;
+            border-color: #28a745;
+        }
+
+        [data-theme="dark"] .status-excellent {
+            background: #1a2e1f;
+            color: #4ade80;
+        }
+
+        .status-good {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-color: #4caf50;
+        }
+
+        [data-theme="dark"] .status-good {
+            background: #1c2e21;
+            color: #86efac;
+        }
+
+        .status-balanced {
+            background: #e9ecef;
+            color: #495057;
+            border-color: #6c757d;
+        }
+
+        [data-theme="dark"] .status-balanced {
+            background: #21262d;
+            color: #8b949e;
+        }
+
+        .status-bad {
+            background: #fff3cd;
+            color: #856404;
+            border-color: #ffc107;
+        }
+
+        [data-theme="dark"] .status-bad {
+            background: #2d2a1a;
+            color: #fbbf24;
+        }
+
+        .status-critical {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #dc3545;
+        }
+
+        [data-theme="dark"] .status-critical {
+            background: #2e1a1d;
+            color: #f87171;
+        }
+
+        .analysis-table {
+            margin-top: var(--spacing-xl);
+        }
+
+        .positive {
+            color: var(--success-color);
+            font-weight: 700;
+        }
+
+        .negative {
+            color: var(--danger-color);
+            font-weight: 700;
+        }
+
+        .neutral {
+            color: var(--neutral-color);
+            font-weight: 700;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            background: var(--bg-secondary);
+            padding: var(--spacing-xl) calc(var(--spacing-xl) * 2);
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            max-width: 90%;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid var(--border-color);
+            border-top: 6px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto var(--spacing-lg);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--text-primary);
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .loading-subtext {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .tabs, .btn, .header, .theme-toggle {
+                display: none;
+            }
+            .container {
+                box-shadow: none;
+                border: none;
+            }
+            .tab-content {
+                display: block !important;
+                padding: var(--spacing-lg);
+            }
+            table {
+                page-break-inside: avoid;
+            }
+        }
+
+        @media (min-width: 1400px) {
+            :root {
+                --spacing-xs: 6px;
+                --spacing-sm: 12px;
+                --spacing-md: 18px;
+                --spacing-lg: 24px;
+                --spacing-xl: 36px;
+            }
+            input[type="number"] {
+                max-width: 180px;
+            }
+            .container {
+                max-width: 1600px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            :root {
+                --spacing-xs: 5px;
+                --spacing-sm: 10px;
+                --spacing-md: 15px;
+                --spacing-lg: 20px;
+                --spacing-xl: 28px;
+            }
+            body {
+                padding: var(--spacing-md);
+            }
+            .header h1 {
+                font-size: 2em;
+            }
+            input[type="number"] {
+                max-width: 140px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --spacing-xs: 4px;
+                --spacing-sm: 8px;
+                --spacing-md: 12px;
+                --spacing-lg: 16px;
+                --spacing-xl: 24px;
+            }
+            body {
+                padding: var(--spacing-sm);
+            }
+            .container {
+                border-radius: 6px;
+            }
+            .header {
+                padding: var(--spacing-lg) var(--spacing-md);
+            }
+            .header h1 {
+                font-size: 1.8em;
+                margin-bottom: var(--spacing-xs);
+            }
+            .header p {
+                font-size: 0.95em;
+            }
+            .theme-toggle {
+                position: static;
+                display: block;
+                margin: 0 auto var(--spacing-md);
+                font-size: 0.85em;
+                padding: var(--spacing-sm) var(--spacing-md);
+            }
+            .tabs {
+                flex-direction: column;
+            }
+            .tab {
+                padding: var(--spacing-md) var(--spacing-lg);
+                font-size: 0.95em;
+            }
+            .tab-content {
+                padding: var(--spacing-lg) var(--spacing-md);
+            }
+            .section {
+                padding: var(--spacing-md);
+                margin-bottom: var(--spacing-lg);
+            }
+            .section-title {
+                font-size: 1.25em;
+                margin-bottom: var(--spacing-sm);
+            }
+            table {
+                font-size: 0.9em;
+                min-width: 600px;
+            }
+            th, td {
+                padding: var(--spacing-sm);
+            }
+            input[type="text"] {
+                padding: var(--spacing-sm);
+                font-size: 0.9em;
+                min-height: 36px;
+            }
+            input[type="number"] {
+                padding: var(--spacing-sm);
+                font-size: 0.9em;
+                min-height: 36px;
+                max-width: 120px;
+            }
+            .btn {
+                padding: var(--spacing-sm) var(--spacing-md);
+                font-size: 0.85em;
+            }
+            .btn-export {
+                padding: var(--spacing-md) var(--spacing-lg);
+                font-size: 0.95em;
+                width: 100%;
+            }
+            .status-indicator {
+                padding: var(--spacing-lg) var(--spacing-md);
+                font-size: 1.1em;
+            }
+            .table-wrapper {
+                margin: 0 calc(var(--spacing-md) * -1);
+            }
+        }
+
+        @media (max-width: 640px) {
+            :root {
+                --spacing-xs: 3px;
+                --spacing-sm: 6px;
+                --spacing-md: 10px;
+                --spacing-lg: 14px;
+                --spacing-xl: 20px;
+            }
+            .header h1 {
+                font-size: 1.6em;
+            }
+            .header p {
+                font-size: 0.9em;
+            }
+            .section-title {
+                font-size: 1.15em;
+            }
+            table {
+                font-size: 0.85em;
+                min-width: 550px;
+            }
+            input[type="number"] {
+                max-width: 110px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            :root {
+                --spacing-xs: 3px;
+                --spacing-sm: 5px;
+                --spacing-md: 8px;
+                --spacing-lg: 12px;
+                --spacing-xl: 16px;
+            }
+            body {
+                padding: var(--spacing-xs);
+            }
+            .container {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+            .header {
+                padding: var(--spacing-md) var(--spacing-sm);
+            }
+            .header h1 {
+                font-size: 1.4em;
+            }
+            .header p {
+                font-size: 0.85em;
+            }
+            .theme-toggle {
+                padding: var(--spacing-sm) var(--spacing-md);
+                font-size: 0.8em;
+                margin-bottom: var(--spacing-sm);
+            }
+            .tab {
+                padding: var(--spacing-sm) var(--spacing-md);
+                font-size: 0.9em;
+            }
+            .tab-content {
+                padding: var(--spacing-md) var(--spacing-sm);
+            }
+            .section {
+                padding: var(--spacing-sm);
+                margin-bottom: var(--spacing-md);
+            }
+            .section-title {
+                font-size: 1.05em;
+                padding-bottom: var(--spacing-xs);
+                margin-bottom: var(--spacing-sm);
+            }
+            table {
+                font-size: 0.8em;
+                min-width: 500px;
+            }
+            th {
+                font-size: 0.75em;
+                padding: var(--spacing-sm);
+            }
+            th, td {
+                padding: var(--spacing-xs) var(--spacing-xs);
+            }
+            input[type="text"] {
+                padding: var(--spacing-xs) var(--spacing-sm);
+                font-size: 0.85em;
+                min-height: 32px;
+            }
+            input[type="number"] {
+                padding: var(--spacing-xs) var(--spacing-sm);
+                font-size: 0.85em;
+                min-height: 32px;
+                max-width: 100px;
+            }
+            .btn {
+                padding: var(--spacing-xs) var(--spacing-sm);
+                font-size: 0.8em;
+            }
+            .btn-add {
+                margin: var(--spacing-xs);
+            }
+            .btn-export {
+                padding: var(--spacing-sm) var(--spacing-md);
+                font-size: 0.9em;
+            }
+            .status-indicator {
+                padding: var(--spacing-md) var(--spacing-sm);
+                font-size: 1em;
+            }
+            #status-score {
+                font-size: 1.6em !important;
+                margin-top: var(--spacing-xs) !important;
+            }
+            .category-row td {
+                padding: var(--spacing-sm);
+                font-size: 0.9em;
+            }
+            .subtotal-row td, .total-row td, .grand-total-row td {
+                padding: var(--spacing-sm);
+            }
+            .table-wrapper {
+                margin: 0 calc(var(--spacing-sm) * -1);
+            }
+        }
+
+        @media (max-width: 360px) {
+            .header h1 {
+                font-size: 1.2em;
+            }
+            .header p {
+                font-size: 0.8em;
+            }
+            .tab {
+                padding: var(--spacing-xs) var(--spacing-sm);
+                font-size: 0.85em;
+            }
+            .section-title {
+                font-size: 1em;
+            }
+            table {
+                font-size: 0.75em;
+                min-width: 450px;
+            }
+            th, td {
+                padding: var(--spacing-xs);
+            }
+            input[type="text"] {
+                padding: var(--spacing-xs);
+                font-size: 0.8em;
+                min-height: 30px;
+            }
+            input[type="number"] {
+                padding: var(--spacing-xs);
+                font-size: 0.8em;
+                min-height: 30px;
+                max-width: 90px;
+            }
+            .btn {
+                padding: var(--spacing-xs);
+                font-size: 0.75em;
+            }
+            .status-indicator {
+                font-size: 0.95em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .category-row td:first-child {
+                position: sticky;
+                right: 0;
+                background: var(--bg-tertiary);
+                z-index: 1;
+            }
+            .table-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">جارٍ التقاط الصورة...</div>
+            <div class="loading-subtext">قد يستغرق هذا بضع ثوانٍ</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <button class="theme-toggle" onclick="toggleTheme()">🌙 الوضع الليلي</button>
+            <h1>💰 وزنة مصاريف</h1>
+            <p>نظام إدارة وتحليل ميزانية الأسرة</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('income')">مصادر الدخل</button>
+            <button class="tab" onclick="switchTab('expenses')">ميزانية الأسرة</button>
+            <button class="tab" onclick="switchTab('analysis')">تحليل موقف الأسرة</button>
+        </div>
+
+        <!-- قسم مصادر الدخل -->
+        <div id="income" class="tab-content active">
+            <h2 class="section-title">📊 تحليل دخل الأسرة</h2>
+            
+            <table id="incomeTable">
+                <thead>
+                    <tr>
+                        <th style="width: 8%">م</th>
+                        <th style="width: 25%">نوع الدخل</th>
+                        <th style="width: 35%">مصدر الدخل</th>
+                        <th style="width: 22%">المبلغ الشهري</th>
+                        <th style="width: 10%">إجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="incomeBody">
+                    <!-- الرواتب والبدلات -->
+                    <tr class="category-row">
+                        <td>1</td>
+                        <td colspan="5"><strong>الرواتب والبدلات</strong></td>
+                    </tr>
+                    <tr data-category="salaries">
+                        <td></td>
+                        <td></td>
+                        <td><input type="text" placeholder="مصدر الدخل"></td>
+                        <td><input type="number" class="income-amount" data-category="salaries" value="0" onchange="calculateIncome()"></td>
+                        <td><button class="btn btn-remove" onclick="removeIncomeRow(this)">حذف</button></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td><button class="btn btn-add" onclick="addIncomeRow('salaries')">+ إضافة مصدر</button></td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr class="subtotal-row">
+                        <td></td>
+                        <td colspan="2"><strong>المجموع</strong></td>
+                        <td><strong id="salaries-total">0</strong></td>
+                        <td></td>
+                    </tr>
+
+                    <!-- الإعانات -->
+                    <tr class="category-row">
+                        <td>2</td>
+                        <td colspan="5"><strong>الإعانات</strong></td>
+                    </tr>
+                    <tr data-category="allowances">
+                        <td></td>
+                        <td></td>
+                        <td><input type="text" placeholder="مصدر الدخل"></td>
+                        <td><input type="number" class="income-amount" data-category="allowances" value="0" onchange="calculateIncome()"></td>
+                        <td><button class="btn btn-remove" onclick="removeIncomeRow(this)">حذف</button></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td><button class="btn btn-add" onclick="addIncomeRow('allowances')">+ إضافة مصدر</button></td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr class="subtotal-row">
+                        <td></td>
+                        <td colspan="2"><strong>المجموع</strong></td>
+                        <td><strong id="allowances-total">0</strong></td>
+                        <td></td>
+                    </tr>
+
+                    <!-- استثمارات -->
+                    <tr class="category-row">
+                        <td>3</td>
+                        <td colspan="5"><strong>استثمارات / مشاريع / أعمال إضافية</strong></td>
+                    </tr>
+                    <tr data-category="investments">
+                        <td></td>
+                        <td></td>
+                        <td><input type="text" placeholder="مصدر الدخل"></td>
+                        <td><input type="number" class="income-amount" data-category="investments" value="0" onchange="calculateIncome()"></td>
+                        <td><button class="btn btn-remove" onclick="removeIncomeRow(this)">حذف</button></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td><button class="btn btn-add" onclick="addIncomeRow('investments')">+ إضافة مصدر</button></td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr class="subtotal-row">
+                        <td></td>
+                        <td colspan="2"><strong>المجموع</strong></td>
+                        <td><strong id="investments-total">0</strong></td>
+                        <td></td>
+                    </tr>
+
+                    <!-- مساهمات أخرى -->
+                    <tr class="category-row">
+                        <td>4</td>
+                        <td colspan="5"><strong>مساهمات أخرى</strong></td>
+                    </tr>
+                    <tr data-category="others">
+                        <td></td>
+                        <td></td>
+                        <td><input type="text" placeholder="مصدر الدخل"></td>
+                        <td><input type="number" class="income-amount" data-category="others" value="0" onchange="calculateIncome()"></td>
+                        <td><button class="btn btn-remove" onclick="removeIncomeRow(this)">حذف</button></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td><button class="btn btn-add" onclick="addIncomeRow('others')">+ إضافة مصدر</button></td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr class="subtotal-row">
+                        <td></td>
+                        <td colspan="2"><strong>المجموع</strong></td>
+                        <td><strong id="others-total">0</strong></td>
+                        <td></td>
+                    </tr>
+
+                    <!-- المجاميع -->
+                    <tr class="total-row">
+                        <td></td>
+                        <td colspan="2"><strong>مجموع الدخل شهرياً</strong></td>
+                        <td><strong id="monthly-income">0</strong></td>
+                        <td></td>
+                    </tr>
+                    <tr class="grand-total-row">
+                        <td></td>
+                        <td colspan="2"><strong>مجموع الدخل سنوياً</strong></td>
+                        <td><strong id="yearly-income">0</strong></td>
+                        <td></td>
+                    </tr>
+                    <tr class="total-row">
+                        <td></td>
+                        <td colspan="2"><strong>إجمالي المصاريف (من جدول المصاريف)</strong></td>
+                        <td><strong id="total-expenses-display">0</strong></td>
+                        <td></td>
+                    </tr>
+                    <tr class="grand-total-row">
+                        <td></td>
+                        <td colspan="2"><strong>صافي الفائض</strong></td>
+                        <td><strong id="net-surplus">0</strong></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <button class="btn btn-export" onclick="exportToPDF('income')">📸 حفظ صورة لتحليل الدخل</button>
+        </div>
+
+        <!-- قسم المصاريف -->
+        <div id="expenses" class="tab-content">
+            <h2 class="section-title">💳 تحليل مصاريف الأسرة</h2>
+            
+            <table id="expensesTable">
+                <thead>
+                    <tr>
+                        <th style="width: 8%">#</th>
+                        <th style="width: 25%">نوع المصروف</th>
+                        <th style="width: 35%">بيان المصروف</th>
+                        <th style="width: 22%">المبلغ الشهري</th>
+                        <th style="width: 10%">إجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="expensesBody">
+                    <!-- المواصلات -->
+                    <tr class="category-row">
+                        <td>1</td>
+                        <td colspan="5"><strong>المواصلات / البنزين</strong></td>
+                    </tr>
+                    <tr data-category="transport">
+                        <td></td>
+                        <td></td>
+                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="number" class="expense-amount" data-category="transport" value="0" onchange="calculateExpenses()"></td>
+                        <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td><button class="btn btn-add" onclick="addExpenseRow('transport')">+ إضافة بند</button></td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr class="subtotal-row">
+                        <td></td>
+                        <td colspan="2"><strong>المجموع</strong></td>
+                        <td><strong id="transport-total">0</strong></td>
+                        <td></td>
+                    </tr>
+
+                    <!-- البيت -->
+                    <tr class="category-row">
+                        <td>2</td>
+                        <td colspan="5"><strong>البيت / الإيجار</strong></td>
+                    </tr>
+                    <tr data-category="housing">
+                        <td></td>
+                        <td></td>
+                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="number" class="expense-amount" data-category="housing" value="0" onchange="calculateExpenses()"></td>
+                        <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td><button class="btn btn-add" onclick="addExpenseRow('housing')">+ إضافة بند</button></td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr class="subtotal-row">
+                        <td></td>
+                        <td colspan="2"><strong>المجموع</strong></td>
+                        <td><strong id="housing-total">0</strong></td>
+                        <td></td>
+                    </tr>
+
+                    <!-- المقاضي -->
+                    <tr class="category-row">
+                        <td>3</td>
+                        <td colspan="5"><strong>المقاضي</strong></td>
+                    </tr>
+                    <tr data-category="groceries">
+                        <td></td>
+                        <td></td>
+                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="number" class="expense-amount" data-category="groceries" value="0" onchange="calculateExpenses()"></td>
+                        <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td><button class="btn btn-add" onclick="addExpenseRow('groceries')">+ إضافة بند</button></td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr class="subtotal-row">
+                        <td></td>
+                        <td colspan="2"><strong>المجموع</strong></td>
+                        <td><strong id="groceries-total">0</strong></td>
+                        <td></td>
+                    </tr>
+
+                    <!-- الصيانة -->
+                    <tr class="category-row">
+                        <td>4</td>
+                        <td colspan="5"><strong>مصاريف صيانة / استبدال</strong></td>
+                    </tr>
+                    <tr data-category="maintenance">
+                        <td></td>
+                        <td></td>
+                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="number" class="expense-amount" data-category="maintenance" value="0" onchange="calculateExpenses()"></td>
+                        <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td><button class="btn btn-add" onclick="addExpenseRow('maintenance')">+ إضافة بند</button></td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr class="subtotal-row">
+                        <td></td>
+                        <td colspan="2"><strong>المجموع</strong></td>
+                        <td><strong id="maintenance-total">0</strong></td>
+                        <td></td>
+                    </tr>
+
+                    <!-- الترفيه -->
+                    <tr class="category-row">
+                        <td>5</td>
+                        <td colspan="5"><strong>الترفيه</strong></td>
+                    </tr>
+                    <tr data-category="entertainment">
+                        <td></td>
+                        <td></td>
+                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="number" class="expense-amount" data-category="entertainment" value="0" onchange="calculateExpenses()"></td>
+                        <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td><button class="btn btn-add" onclick="addExpenseRow('entertainment')">+ إضافة بند</button></td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr class="subtotal-row">
+                        <td></td>
+                        <td colspan="2"><strong>المجموع</strong></td>
+                        <td><strong id="entertainment-total">0</strong></td>
+                        <td></td>
+                    </tr>
+
+                    <!-- الصحة -->
+                    <tr class="category-row">
+                        <td>6</td>
+                        <td colspan="5"><strong>الصحة</strong></td>
+                    </tr>
+                    <tr data-category="health">
+                        <td></td>
+                        <td></td>
+                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="number" class="expense-amount" data-category="health" value="0" onchange="calculateExpenses()"></td>
+                        <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td><button class="btn btn-add" onclick="addExpenseRow('health')">+ إضافة بند</button></td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr class="subtotal-row">
+                        <td></td>
+                        <td colspan="2"><strong>المجموع</strong></td>
+                        <td><strong id="health-total">0</strong></td>
+                        <td></td>
+                    </tr>
+
+                    <!-- التعليم -->
+                    <tr class="category-row">
+                        <td>7</td>
+                        <td colspan="5"><strong>التعليم</strong></td>
+                    </tr>
+                    <tr data-category="education">
+                        <td></td>
+                        <td></td>
+                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="number" class="expense-amount" data-category="education" value="0" onchange="calculateExpenses()"></td>
+                        <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td><button class="btn btn-add" onclick="addExpenseRow('education')">+ إضافة بند</button></td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr class="subtotal-row">
+                        <td></td>
+                        <td colspan="2"><strong>المجموع</strong></td>
+                        <td><strong id="education-total">0</strong></td>
+                        <td></td>
+                    </tr>
+
+                    <!-- الصدقات -->
+                    <tr class="category-row">
+                        <td>8</td>
+                        <td colspan="5"><strong>الصدقات / الزكاة / الهبات</strong></td>
+                    </tr>
+                    <tr data-category="charity">
+                        <td></td>
+                        <td></td>
+                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="number" class="expense-amount" data-category="charity" value="0" onchange="calculateExpenses()"></td>
+                        <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td><button class="btn btn-add" onclick="addExpenseRow('charity')">+ إضافة بند</button></td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr class="subtotal-row">
+                        <td></td>
+                        <td colspan="2"><strong>المجموع</strong></td>
+                        <td><strong id="charity-total">0</strong></td>
+                        <td></td>
+                    </tr>
+
+                    <!-- الالتزامات -->
+                    <tr class="category-row">
+                        <td>9</td>
+                        <td colspan="5"><strong>الالتزامات / الديون</strong></td>
+                    </tr>
+                    <tr data-category="debts">
+                        <td></td>
+                        <td></td>
+                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="number" class="expense-amount" data-category="debts" value="0" onchange="calculateExpenses()"></td>
+                        <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td><button class="btn btn-add" onclick="addExpenseRow('debts')">+ إضافة بند</button></td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr class="subtotal-row">
+                        <td></td>
+                        <td colspan="2"><strong>المجموع</strong></td>
+                        <td><strong id="debts-total">0</strong></td>
+                        <td></td>
+                    </tr>
+
+                    <!-- الادخار -->
+                    <tr class="category-row">
+                        <td>10</td>
+                        <td colspan="5"><strong>ادخار / طوارئ</strong></td>
+                    </tr>
+                    <tr data-category="savings">
+                        <td></td>
+                        <td></td>
+                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="number" class="expense-amount" data-category="savings" value="0" onchange="calculateExpenses()"></td>
+                        <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <td><button class="btn btn-add" onclick="addExpenseRow('savings')">+ إضافة بند</button></td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr class="subtotal-row">
+                        <td></td>
+                        <td colspan="2"><strong>المجموع</strong></td>
+                        <td><strong id="savings-total">0</strong></td>
+                        <td></td>
+                    </tr>
+
+                    <!-- المجاميع -->
+                    <tr class="total-row">
+                        <td></td>
+                        <td colspan="2"><strong>مجموع المصاريف شهرياً</strong></td>
+                        <td><strong id="monthly-expenses">0</strong></td>
+                        <td></td>
+                    </tr>
+                    <tr class="grand-total-row">
+                        <td></td>
+                        <td colspan="2"><strong>مجموع المصاريف سنوياً</strong></td>
+                        <td><strong id="yearly-expenses">0</strong></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <button class="btn btn-export" onclick="exportToPDF('expenses')">📸 حفظ صورة لتحليل المصاريف</button>
+        </div>
+
+        <!-- قسم التحليل -->
+        <div id="analysis" class="tab-content">
+            <h2 class="section-title">📈 تحليل موقف الأسرة</h2>
+            
+            <div id="status-display" class="status-indicator">
+                <div id="status-text">قم بإدخال البيانات لعرض التحليل</div>
+                <div id="status-score" style="font-size: 2em; margin-top: 10px;"></div>
+            </div>
+
+            <table class="analysis-table">
+                <thead>
+                    <tr>
+                        <th>النتيجة</th>
+                        <th>الموقف</th>
+                        <th>التطوير المقترح</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="positive">+5</td>
+                        <td>ممتاز جداً</td>
+                        <td>استمر في نفس النهج وزد الاستثمارات</td>
+                    </tr>
+                    <tr>
+                        <td class="positive">+4</td>
+                        <td>ممتاز</td>
+                        <td>وضع ممتاز، فكر في فرص استثمارية جديدة</td>
+                    </tr>
+                    <tr>
+                        <td class="positive">+3</td>
+                        <td>جيد جداً</td>
+                        <td>حافظ على هذا المستوى وراجع خطة الادخار</td>
+                    </tr>
+                    <tr>
+                        <td class="positive">+2</td>
+                        <td>جيد</td>
+                        <td>حاول زيادة الفائض من خلال تقليل المصاريف غير الضرورية</td>
+                    </tr>
+                    <tr>
+                        <td class="positive">+1</td>
+                        <td>مناسب</td>
+                        <td>ابحث عن طرق لزيادة الدخل أو تقليل المصاريف</td>
+                    </tr>
+                    <tr>
+                        <td class="neutral">0</td>
+                        <td>متوازن</td>
+                        <td>الوضع متوازن، لكن يحتاج إلى بناء احتياطي للطوارئ</td>
+                    </tr>
+                    <tr>
+                        <td class="negative">-1</td>
+                        <td>تراجع</td>
+                        <td>راجع المصاريف وابحث عن مصادر دخل إضافية</td>
+                    </tr>
+                    <tr>
+                        <td class="negative">-2</td>
+                        <td>غير جيد</td>
+                        <td>قلل المصاريف غير الضرورية فوراً</td>
+                    </tr>
+                    <tr>
+                        <td class="negative">-3</td>
+                        <td>سيئ</td>
+                        <td>أعد هيكلة الميزانية وقلل المصاريف بشكل كبير</td>
+                    </tr>
+                    <tr>
+                        <td class="negative">-4</td>
+                        <td>سيئ جداً</td>
+                        <td>تدخل عاجل مطلوب - راجع جميع الالتزامات والديون</td>
+                    </tr>
+                    <tr>
+                        <td class="negative">-5</td>
+                        <td>يحتاج تدخل عاجل</td>
+                        <td>استشر مستشار مالي فوراً وأعد هيكلة الديون</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <button class="btn btn-export" onclick="exportToPDF('analysis')">📸 حفظ صورة للتحليل</button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== نظام تقييد وقت العمل مع لوحة تحكم Admin ====================
+        
+        /**
+         * إعدادات أوقات العمل الافتراضية
+         * يمكن للأدمن تغييرها من لوحة التحكم
+         */
+        const DEFAULT_CONFIG = {
+            enabled: true,
+            startHour: 9,
+            endHour: 17,
+            allowedDays: [0, 1, 2, 3, 4, 5, 6],
+            adminPassword: 'admin123',  // ⚠️ غير كلمة المرور هذه!
+            messages: {
+                outsideHours: 'عذراً، التطبيق يعمل فقط من الساعة {start} صباحاً إلى {end} مساءً',
+                blockedDay: 'عذراً، التطبيق لا يعمل في هذا اليوم',
+                remainingTime: 'الوقت المتبقي للعمل اليوم: {hours} ساعة و {minutes} دقيقة'
+            }
+        };
+
+        /**
+         * تحميل إعدادات من LocalStorage أو استخدام الافتراضية
+         */
+        function loadWorkHoursConfig() {
+            const saved = localStorage.getItem('workHoursConfig');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    return { ...DEFAULT_CONFIG, ...parsed };
+                } catch (e) {
+                    console.error('خطأ في تحميل الإعدادات:', e);
+                    return DEFAULT_CONFIG;
+                }
+            }
+            return DEFAULT_CONFIG;
+        }
+
+        /**
+         * حفظ الإعدادات في LocalStorage
+         */
+        function saveWorkHoursConfig(config) {
+            try {
+                localStorage.setItem('workHoursConfig', JSON.stringify(config));
+                return true;
+            } catch (e) {
+                console.error('خطأ في حفظ الإعدادات:', e);
+                return false;
+            }
+        }
+
+        // تحميل الإعدادات
+        let WORK_HOURS_CONFIG = loadWorkHoursConfig();
+
+        /**
+         * إظهار لوحة تحكم الأدمن
+         */
+        function showAdminPanel() {
+            // طلب كلمة المرور
+            const password = prompt('🔐 أدخل كلمة مرور الأدمن:');
+            
+            if (password !== WORK_HOURS_CONFIG.adminPassword) {
+                alert('❌ كلمة المرور غير صحيحة!');
+                return;
+            }
+
+            // إنشاء لوحة التحكم
+            const panel = document.createElement('div');
+            panel.id = 'admin-panel';
+            panel.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                z-index: 99999;
+                overflow-y: auto;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                font-family: 'Cairo', sans-serif;
+            `;
+
+            panel.innerHTML = `
+                <div style="
+                    background: white;
+                    border-radius: 15px;
+                    padding: 30px;
+                    max-width: 600px;
+                    width: 100%;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                        <h2 style="margin: 0; color: #333; font-size: 24px;">
+                            🔐 لوحة تحكم الأدمن
+                        </h2>
+                        <button onclick="closeAdminPanel()" style="
+                            background: #dc3545;
+                            color: white;
+                            border: none;
+                            padding: 8px 15px;
+                            border-radius: 5px;
+                            cursor: pointer;
+                            font-family: 'Cairo', sans-serif;
+                            font-weight: 600;
+                        ">✕ إغلاق</button>
+                    </div>
+
+                    <div style="
+                        background: #e7f3ff;
+                        border: 2px solid #0d6efd;
+                        border-radius: 8px;
+                        padding: 12px;
+                        margin-bottom: 20px;
+                        font-size: 13px;
+                        color: #0d6efd;
+                    ">
+                        <strong>🔑 طرق الوصول السرية:</strong><br>
+                        • اختصار لوحة المفاتيح: <code style="background: white; padding: 2px 6px; border-radius: 3px;">Ctrl+Shift+A</code><br>
+                        • انقر 5 مرات سريعة في الزاوية اليمنى العليا<br>
+                        • افتح الرابط مع: <code style="background: white; padding: 2px 6px; border-radius: 3px;">?admin=true</code>
+                    </div>
+
+                    <div style="
+                        background: #fff3cd;
+                        border: 2px solid #ffc107;
+                        border-radius: 8px;
+                        padding: 12px;
+                        margin-bottom: 20px;
+                        font-size: 13px;
+                        color: #856404;
+                    ">
+                        <strong>🚨 إذا أغلق التطبيق (خارج أوقات العمل):</strong><br>
+                        • افتح الرابط مع: <code style="background: white; padding: 2px 6px; border-radius: 3px;">?bypass=true</code><br>
+                        • أو اضغط زر "دخول الأدمن" في شاشة الحظر
+                    </div>
+
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <h3 style="margin: 0 0 15px 0; color: #495057; font-size: 18px;">📊 الإعدادات الحالية</h3>
+                        <div style="display: grid; gap: 10px;">
+                            <div style="padding: 10px; background: white; border-radius: 5px;">
+                                <strong>الحالة:</strong> ${WORK_HOURS_CONFIG.enabled ? '🟢 مفعّل' : '🔴 معطّل'}
+                            </div>
+                            <div style="padding: 10px; background: white; border-radius: 5px;">
+                                <strong>ساعات العمل:</strong> من ${WORK_HOURS_CONFIG.startHour}:00 إلى ${WORK_HOURS_CONFIG.endHour}:00
+                            </div>
+                            <div style="padding: 10px; background: white; border-radius: 5px;">
+                                <strong>عدد الساعات اليومية:</strong> ${WORK_HOURS_CONFIG.endHour - WORK_HOURS_CONFIG.startHour} ساعة
+                            </div>
+                            <div style="padding: 10px; background: white; border-radius: 5px;">
+                                <strong>أيام العمل:</strong> ${getDaysText(WORK_HOURS_CONFIG.allowedDays)}
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="admin-form" style="display: grid; gap: 20px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #495057;">
+                                تفعيل/تعطيل النظام
+                            </label>
+                            <select id="admin-enabled" style="
+                                width: 100%;
+                                padding: 10px;
+                                border: 2px solid #dee2e6;
+                                border-radius: 5px;
+                                font-family: 'Cairo', sans-serif;
+                                font-size: 14px;
+                            ">
+                                <option value="true" ${WORK_HOURS_CONFIG.enabled ? 'selected' : ''}>🟢 مفعّل</option>
+                                <option value="false" ${!WORK_HOURS_CONFIG.enabled ? 'selected' : ''}>🔴 معطّل</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #495057;">
+                                ⏰ ساعة البداية (0-23)
+                            </label>
+                            <input type="number" id="admin-start" min="0" max="23" value="${WORK_HOURS_CONFIG.startHour}" style="
+                                width: 100%;
+                                padding: 10px;
+                                border: 2px solid #dee2e6;
+                                border-radius: 5px;
+                                font-family: 'Cairo', sans-serif;
+                                font-size: 14px;
+                            ">
+                            <small style="color: #6c757d; display: block; margin-top: 5px;">
+                                مثال: 8 = 8 صباحاً، 14 = 2 ظهراً
+                            </small>
+                        </div>
+
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #495057;">
+                                ⏰ ساعة النهاية (0-23)
+                            </label>
+                            <input type="number" id="admin-end" min="0" max="23" value="${WORK_HOURS_CONFIG.endHour}" style="
+                                width: 100%;
+                                padding: 10px;
+                                border: 2px solid #dee2e6;
+                                border-radius: 5px;
+                                font-family: 'Cairo', sans-serif;
+                                font-size: 14px;
+                            ">
+                            <small style="color: #6c757d; display: block; margin-top: 5px;">
+                                مثال: 17 = 5 مساءً، 20 = 8 مساءً
+                            </small>
+                        </div>
+
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #495057;">
+                                📅 أيام العمل
+                            </label>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                                ${['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'].map((day, i) => `
+                                    <label style="
+                                        display: flex;
+                                        align-items: center;
+                                        padding: 10px;
+                                        background: #f8f9fa;
+                                        border-radius: 5px;
+                                        cursor: pointer;
+                                        border: 2px solid ${WORK_HOURS_CONFIG.allowedDays.includes(i) ? '#28a745' : '#dee2e6'};
+                                    ">
+                                        <input type="checkbox" class="admin-day" value="${i}" 
+                                            ${WORK_HOURS_CONFIG.allowedDays.includes(i) ? 'checked' : ''}
+                                            style="margin-left: 8px; width: 18px; height: 18px; cursor: pointer;">
+                                        <span style="font-size: 14px;">${day}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <div style="
+                            background: #fff3cd;
+                            border: 2px solid #ffc107;
+                            border-radius: 8px;
+                            padding: 15px;
+                            margin-top: 10px;
+                        ">
+                            <div style="display: flex; align-items: start; gap: 10px;">
+                                <span style="font-size: 24px;">💡</span>
+                                <div>
+                                    <strong style="color: #856404; display: block; margin-bottom: 5px;">نماذج جاهزة:</strong>
+                                    <div style="display: grid; gap: 8px; font-size: 13px; color: #856404;">
+                                        <button type="button" onclick="applyPreset('government')" style="
+                                            background: white;
+                                            border: 1px solid #ffc107;
+                                            padding: 8px;
+                                            border-radius: 5px;
+                                            cursor: pointer;
+                                            text-align: right;
+                                            font-family: 'Cairo', sans-serif;
+                                        ">🏛️ دوام حكومي (7:30-3:30، الأحد-الخميس)</button>
+                                        <button type="button" onclick="applyPreset('private')" style="
+                                            background: white;
+                                            border: 1px solid #ffc107;
+                                            padding: 8px;
+                                            border-radius: 5px;
+                                            cursor: pointer;
+                                            text-align: right;
+                                            font-family: 'Cairo', sans-serif;
+                                        ">🏢 دوام خاص (9-6، الأحد-الجمعة)</button>
+                                        <button type="button" onclick="applyPreset('flexible')" style="
+                                            background: white;
+                                            border: 1px solid #ffc107;
+                                            padding: 8px;
+                                            border-radius: 5px;
+                                            cursor: pointer;
+                                            text-align: right;
+                                            font-family: 'Cairo', sans-serif;
+                                        ">⏰ مرن (6 ساعات، كل الأيام)</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                            <button type="button" onclick="saveAdminSettings()" style="
+                                background: #28a745;
+                                color: white;
+                                border: none;
+                                padding: 12px;
+                                border-radius: 8px;
+                                cursor: pointer;
+                                font-family: 'Cairo', sans-serif;
+                                font-weight: 600;
+                                font-size: 16px;
+                            ">💾 حفظ الإعدادات</button>
+                            
+                            <button type="button" onclick="resetToDefault()" style="
+                                background: #6c757d;
+                                color: white;
+                                border: none;
+                                padding: 12px;
+                                border-radius: 8px;
+                                cursor: pointer;
+                                font-family: 'Cairo', sans-serif;
+                                font-weight: 600;
+                                font-size: 16px;
+                            ">🔄 إعادة تعيين</button>
+                        </div>
+
+                        <div style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 8px; border: 2px solid #0d6efd;">
+                            <h4 style="margin: 0 0 10px 0; color: #0d6efd; font-size: 16px;">🔐 تغيير كلمة مرور الأدمن</h4>
+                            <input type="password" id="admin-new-password" placeholder="كلمة المرور الجديدة" style="
+                                width: 100%;
+                                padding: 10px;
+                                border: 2px solid #0d6efd;
+                                border-radius: 5px;
+                                font-family: 'Cairo', sans-serif;
+                                margin-bottom: 10px;
+                            ">
+                            <button type="button" onclick="changeAdminPassword()" style="
+                                background: #0d6efd;
+                                color: white;
+                                border: none;
+                                padding: 10px;
+                                border-radius: 5px;
+                                cursor: pointer;
+                                font-family: 'Cairo', sans-serif;
+                                font-weight: 600;
+                                width: 100%;
+                            ">تغيير كلمة المرور</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+            document.body.appendChild(panel);
+
+            // إضافة مستمعات للأحداث
+            document.querySelectorAll('.admin-day').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    this.parentElement.style.borderColor = this.checked ? '#28a745' : '#dee2e6';
+                });
+            });
+        }
+
+        /**
+         * إغلاق لوحة التحكم
+         */
+        function closeAdminPanel() {
+            const panel = document.getElementById('admin-panel');
+            if (panel) {
+                panel.remove();
+            }
+        }
+
+        /**
+         * حفظ إعدادات الأدمن
+         */
+        function saveAdminSettings() {
+            const enabled = document.getElementById('admin-enabled').value === 'true';
+            const startHour = parseInt(document.getElementById('admin-start').value);
+            const endHour = parseInt(document.getElementById('admin-end').value);
+            const allowedDays = Array.from(document.querySelectorAll('.admin-day:checked')).map(cb => parseInt(cb.value));
+
+            // التحقق من صحة البيانات
+            if (startHour >= endHour) {
+                alert('❌ خطأ: ساعة البداية يجب أن تكون قبل ساعة النهاية!');
+                return;
+            }
+
+            if (allowedDays.length === 0 && enabled) {
+                alert('❌ خطأ: يجب اختيار يوم واحد على الأقل!');
+                return;
+            }
+
+            // حفظ الإعدادات
+            WORK_HOURS_CONFIG = {
+                ...WORK_HOURS_CONFIG,
+                enabled,
+                startHour,
+                endHour,
+                allowedDays
+            };
+
+            if (saveWorkHoursConfig(WORK_HOURS_CONFIG)) {
+                alert(`✅ تم حفظ الإعدادات بنجاح!\n\n📊 التفاصيل:\n• عدد ساعات العمل: ${endHour - startHour} ساعة\n• من ${startHour}:00 إلى ${endHour}:00\n• أيام العمل: ${getDaysText(allowedDays)}\n\nسيتم تطبيق الإعدادات فوراً.`);
+                closeAdminPanel();
+                
+                // إعادة تحميل الصفحة لتطبيق الإعدادات
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                alert('❌ فشل حفظ الإعدادات! حاول مرة أخرى.');
+            }
+        }
+
+        /**
+         * تطبيق إعدادات جاهزة
+         */
+        function applyPreset(type) {
+            const presets = {
+                government: {
+                    startHour: 7,
+                    endHour: 15,
+                    allowedDays: [0, 1, 2, 3, 4]
+                },
+                private: {
+                    startHour: 9,
+                    endHour: 18,
+                    allowedDays: [0, 1, 2, 3, 4, 5]
+                },
+                flexible: {
+                    startHour: 10,
+                    endHour: 16,
+                    allowedDays: [0, 1, 2, 3, 4, 5, 6]
+                }
+            };
+
+            const preset = presets[type];
+            if (preset) {
+                document.getElementById('admin-start').value = preset.startHour;
+                document.getElementById('admin-end').value = preset.endHour;
+                
+                document.querySelectorAll('.admin-day').forEach(cb => {
+                    cb.checked = preset.allowedDays.includes(parseInt(cb.value));
+                    cb.parentElement.style.borderColor = cb.checked ? '#28a745' : '#dee2e6';
+                });
+            }
+        }
+
+        /**
+         * إعادة تعيين للإعدادات الافتراضية
+         */
+        function resetToDefault() {
+            if (confirm('⚠️ هل أنت متأكد من إعادة تعيين جميع الإعدادات للوضع الافتراضي؟')) {
+                WORK_HOURS_CONFIG = { ...DEFAULT_CONFIG };
+                saveWorkHoursConfig(WORK_HOURS_CONFIG);
+                alert('✅ تم إعادة التعيين بنجاح!');
+                closeAdminPanel();
+                setTimeout(() => location.reload(), 1000);
+            }
+        }
+
+        /**
+         * تغيير كلمة مرور الأدمن
+         */
+        function changeAdminPassword() {
+            const newPassword = document.getElementById('admin-new-password').value;
+            
+            if (!newPassword || newPassword.length < 6) {
+                alert('❌ كلمة المرور يجب أن تكون 6 أحرف على الأقل!');
+                return;
+            }
+
+            WORK_HOURS_CONFIG.adminPassword = newPassword;
+            if (saveWorkHoursConfig(WORK_HOURS_CONFIG)) {
+                alert('✅ تم تغيير كلمة المرور بنجاح!\n\n🔐 لا تنسى كلمة المرور الجديدة.');
+                document.getElementById('admin-new-password').value = '';
+            }
+        }
+
+        /**
+         * الحصول على نص الأيام
+         */
+        function getDaysText(days) {
+            const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+            return days.map(d => dayNames[d]).join(', ');
+        }
+
+        /**
+         * اختصار لوحة المفاتيح السري للأدمن
+         * للوصول إلى لوحة التحكم: اضغط Ctrl+Shift+A (Windows/Linux) أو Cmd+Shift+A (Mac)
+         */
+        let adminKeySequence = [];
+        const ADMIN_KEY_COMBO = ['Control', 'Shift', 'A']; // يمكن تغيير الاختصار هنا
+        
+        function setupAdminKeyboardShortcut() {
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+Shift+A (Windows/Linux) أو Cmd+Shift+A (Mac)
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'a') {
+                    e.preventDefault();
+                    showAdminPanel();
+                    return;
+                }
+                
+                // طريقة بديلة: النقر 5 مرات على زاوية الشاشة
+                // (سيتم تفعيلها بالأسفل)
+            });
+        }
+
+        /**
+         * طريقة بديلة: النقر السريع في زاوية الشاشة
+         * انقر 5 مرات متتالية في الزاوية اليمنى العليا خلال 2 ثانية
+         */
+        let clickCount = 0;
+        let clickTimer = null;
+        
+        function setupAdminClickTrigger() {
+            document.addEventListener('click', function(e) {
+                // التحقق من النقر في الزاوية اليمنى العليا (50x50 بكسل)
+                if (e.clientX > window.innerWidth - 50 && e.clientY < 50) {
+                    clickCount++;
+                    
+                    // إعادة تعيين العداد بعد ثانيتين
+                    if (clickTimer) clearTimeout(clickTimer);
+                    clickTimer = setTimeout(() => {
+                        clickCount = 0;
+                    }, 2000);
+                    
+                    // إظهار لوحة التحكم بعد 5 نقرات
+                    if (clickCount >= 5) {
+                        clickCount = 0;
+                        showAdminPanel();
+                    }
+                }
+            });
+        }
+
+        /**
+         * طريقة ثالثة: رابط URL مخفي
+         * افتح التطبيق مع: ?admin=true
+         * مثال: http://example.com/app.html?admin=true
+         */
+        function checkAdminURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('admin') === 'true') {
+                // إظهار زر الأدمن فقط عند وجود معامل admin في الرابط
+                addVisibleAdminButton();
+            }
+        }
+
+        /**
+         * إضافة زر مرئي (فقط عند استخدام رابط admin)
+         */
+        function addVisibleAdminButton() {
+            const header = document.querySelector('.header');
+            if (header && !document.getElementById('admin-btn')) {
+                const adminBtn = document.createElement('button');
+                adminBtn.id = 'admin-btn';
+                adminBtn.innerHTML = '⚙️';
+                adminBtn.title = 'لوحة تحكم الأدمن';
+                adminBtn.style.cssText = `
+                    position: absolute;
+                    right: 20px;
+                    top: 20px;
+                    background: rgba(108, 117, 125, 0.1);
+                    border: 1px solid var(--border-color);
+                    padding: 8px 12px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 18px;
+                    transition: all 0.3s ease;
+                `;
+                adminBtn.onmouseover = function() {
+                    this.style.background = 'var(--accent-color)';
+                    this.style.transform = 'scale(1.1)';
+                };
+                adminBtn.onmouseout = function() {
+                    this.style.background = 'rgba(108, 117, 125, 0.1)';
+                    this.style.transform = 'scale(1)';
+                };
+                adminBtn.onclick = showAdminPanel;
+                header.appendChild(adminBtn);
+            }
+        }
+
+        /**
+         * دالة bypass للأدمن من شاشة الحظر
+         */
+        function adminBypass() {
+            const password = prompt('🔐 أدخل كلمة مرور الأدمن للدخول:');
+            
+            if (password === WORK_HOURS_CONFIG.adminPassword) {
+                // إعادة تحميل الصفحة مع معامل bypass
+                const currentUrl = window.location.href.split('?')[0];
+                window.location.href = currentUrl + '?bypass=true';
+            } else {
+                alert('❌ كلمة المرور غير صحيحة!');
+            }
+        }
+
+        /**
+         * التحقق من أوقات العمل
+         */
+        function checkWorkingHours() {
+            // التحقق من bypass في الرابط (للأدمن فقط)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('bypass') === 'true' || urlParams.get('admin') === 'true') {
+                console.log('⚠️ تم تجاوز تقييد أوقات العمل (وضع الأدمن)');
+                return true; // السماح بالدخول
+            }
+
+            if (!WORK_HOURS_CONFIG.enabled) return true;
+
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentDay = now.getDay();
+            
+            if (!WORK_HOURS_CONFIG.allowedDays.includes(currentDay)) {
+                showBlockedScreen('blockedDay');
+                return false;
+            }
+            
+            if (currentHour < WORK_HOURS_CONFIG.startHour || currentHour >= WORK_HOURS_CONFIG.endHour) {
+                showBlockedScreen('outsideHours');
+                return false;
+            }
+            
+            return true;
+        }
+
+        /**
+         * عرض شاشة الحظر
+         */
+        function showBlockedScreen(reason) {
+            const message = WORK_HOURS_CONFIG.messages[reason]
+                .replace('{start}', WORK_HOURS_CONFIG.startHour)
+                .replace('{end}', WORK_HOURS_CONFIG.endHour);
+            
+            const container = document.querySelector('.container');
+            if (container) {
+                container.style.display = 'none';
+            }
+            
+            const blockedScreen = document.createElement('div');
+            blockedScreen.id = 'blocked-screen';
+            blockedScreen.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                font-family: 'Cairo', sans-serif;
+            `;
+            
+            blockedScreen.innerHTML = `
+                <div style="
+                    background: white;
+                    padding: 40px;
+                    border-radius: 20px;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                    text-align: center;
+                    max-width: 500px;
+                    margin: 20px;
+                ">
+                    <div style="font-size: 80px; margin-bottom: 20px;">🕐</div>
+                    <h1 style="
+                        color: #333;
+                        font-size: 28px;
+                        margin-bottom: 15px;
+                        font-weight: 700;
+                    ">خارج أوقات العمل</h1>
+                    <p style="
+                        color: #666;
+                        font-size: 18px;
+                        line-height: 1.8;
+                        margin-bottom: 25px;
+                    ">${message}</p>
+                    <div id="countdown-timer" style="
+                        background: #f0f0f0;
+                        padding: 15px;
+                        border-radius: 10px;
+                        font-size: 16px;
+                        color: #555;
+                        margin-bottom: 20px;
+                    "></div>
+                    <div style="
+                        font-size: 14px;
+                        color: #999;
+                        margin-top: 20px;
+                        margin-bottom: 25px;
+                    ">
+                        الوقت الحالي: <strong id="current-time"></strong>
+                    </div>
+                    
+                    <!-- زر الأدمن المخفي -->
+                    <div style="
+                        border-top: 1px solid #eee;
+                        padding-top: 20px;
+                        margin-top: 20px;
+                    ">
+                        <button onclick="adminBypass()" style="
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            border: none;
+                            padding: 12px 25px;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-family: 'Cairo', sans-serif;
+                            font-weight: 600;
+                            font-size: 14px;
+                            transition: all 0.3s ease;
+                            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.6)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)';">
+                            🔑 النظام مغلق (مؤقتا)
+                        </button>
+                        <p style="
+                            font-size: 12px;
+                            color: #999;
+                            margin-top: 10px;
+                        ">انتظر انتهاء الوقت المحدد</p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(blockedScreen);
+            
+            updateBlockedScreenTime();
+            setInterval(updateBlockedScreenTime, 1000);
+        }
+
+        /**
+         * تحديث الوقت في شاشة الحظر
+         */
+        function updateBlockedScreenTime() {
+            const now = new Date();
+            const currentTimeEl = document.getElementById('current-time');
+            const countdownEl = document.getElementById('countdown-timer');
+            
+            if (currentTimeEl) {
+                currentTimeEl.textContent = now.toLocaleTimeString('ar-SA', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            }
+            
+            if (countdownEl) {
+                const currentHour = now.getHours();
+                let timeUntilStart;
+                
+                if (currentHour < WORK_HOURS_CONFIG.startHour) {
+                    timeUntilStart = new Date(now);
+                    timeUntilStart.setHours(WORK_HOURS_CONFIG.startHour, 0, 0, 0);
+                } else {
+                    timeUntilStart = new Date(now);
+                    timeUntilStart.setDate(timeUntilStart.getDate() + 1);
+                    timeUntilStart.setHours(WORK_HOURS_CONFIG.startHour, 0, 0, 0);
+                }
+                
+                const diff = timeUntilStart - now;
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                countdownEl.innerHTML = `
+                    ⏰ سيبدأ العمل بعد: <strong>${hours}</strong> ساعة و <strong>${minutes}</strong> دقيقة و <strong>${seconds}</strong> ثانية
+                `;
+                
+                if (hours === 0 && minutes === 0 && seconds === 0) {
+                    location.reload();
+                }
+            }
+        }
+
+        /**
+         * عرض الوقت المتبقي في الهيدر
+         */
+        function showRemainingTime() {
+            if (!WORK_HOURS_CONFIG.enabled) return;
+            
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            
+            if (currentHour >= WORK_HOURS_CONFIG.startHour && currentHour < WORK_HOURS_CONFIG.endHour) {
+                const remainingHours = WORK_HOURS_CONFIG.endHour - currentHour - 1;
+                const remainingMinutes = 60 - currentMinute;
+                
+                const header = document.querySelector('.header p');
+                if (header && remainingHours >= 0) {
+                    const timeInfo = document.createElement('div');
+                    timeInfo.style.cssText = `
+                        margin-top: 10px;
+                        padding: 8px 15px;
+                        background: rgba(255, 193, 7, 0.1);
+                        border-radius: 6px;
+                        font-size: 0.9em;
+                        color: var(--text-secondary);
+                    `;
+                    timeInfo.innerHTML = `⏰ الوقت المتبقي: ${remainingHours} ساعة و ${remainingMinutes} دقيقة`;
+                    header.parentElement.appendChild(timeInfo);
+                    
+                    setInterval(() => {
+                        const now = new Date();
+                        const h = WORK_HOURS_CONFIG.endHour - now.getHours() - 1;
+                        const m = 60 - now.getMinutes();
+                        timeInfo.innerHTML = `⏰ الوقت المتبقي: ${h} ساعة و ${m} دقيقة`;
+                        
+                        if (h < 0) {
+                            location.reload();
+                        }
+                    }, 60000);
+                }
+            }
+        }
+
+        /**
+         * التحقق الدوري من أوقات العمل
+         */
+        function startWorkHoursMonitoring() {
+            setInterval(() => {
+                if (!checkWorkingHours()) {
+                    location.reload();
+                }
+            }, 60000);
+        }
+
+        // ==================== نهاية نظام تقييد وقت العمل ====================
+
+        // التبديل بين الوضع الليلي والنهاري
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            const themeButton = document.querySelector('.theme-toggle');
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            if (newTheme === 'dark') {
+                themeButton.innerHTML = '☀️ الوضع النهاري';
+            } else {
+                themeButton.innerHTML = '🌙 الوضع الليلي';
+            }
+        }
+
+        // تحميل الثيم المحفوظ
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const themeButton = document.querySelector('.theme-toggle');
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            if (savedTheme === 'dark') {
+                themeButton.innerHTML = '☀️ الوضع النهاري';
+            }
+        }
+
+        // التنقل بين الأقسام
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // تفعيل التاب المطلوب
+            const activeTab = Array.from(tabs).find(tab => {
+                const tabText = tab.textContent.trim();
+                return (tabName === 'income' && tabText.includes('مصادر الدخل')) ||
+                       (tabName === 'expenses' && tabText.includes('ميزانية الأسرة')) ||
+                       (tabName === 'analysis' && tabText.includes('تحليل موقف'));
+            });
+            
+            if (activeTab) activeTab.classList.add('active');
+            
+            const content = document.getElementById(tabName);
+            if (content) content.classList.add('active');
+            
+            if (tabName === 'analysis') {
+                updateAnalysis();
+            }
+        }
+
+        // إضافة صف دخل جديد
+        function addIncomeRow(category) {
+            const tbody = document.getElementById('incomeBody');
+            const newRow = document.createElement('tr');
+            newRow.setAttribute('data-category', category);
+            newRow.innerHTML = `
+                <td></td>
+                <td></td>
+                <td><input type="text" placeholder="مصدر الدخل"></td>
+                <td><input type="number" class="income-amount" data-category="${category}" value="0" onchange="calculateIncome()"></td>
+                <td><button class="btn btn-remove" onclick="removeIncomeRow(this)">حذف</button></td>
+            `;
+            
+            const allRows = Array.from(tbody.querySelectorAll('tr'));
+            let addButtonRow = null;
+            let foundCategory = false;
+            
+            for (let i = 0; i < allRows.length; i++) {
+                const row = allRows[i];
+                if (row.classList.contains('category-row') && row.textContent.includes(getCategoryName(category))) {
+                    foundCategory = true;
+                    continue;
+                }
+                if (foundCategory && row.querySelector('.btn-add')) {
+                    addButtonRow = row;
+                    break;
+                }
+            }
+            
+            if (addButtonRow) {
+                tbody.insertBefore(newRow, addButtonRow);
+            }
+        }
+
+        function getCategoryName(category) {
+            const names = {
+                'salaries': 'الرواتب والبدلات',
+                'allowances': 'الإعانات',
+                'investments': 'استثمارات',
+                'others': 'مساهمات أخرى'
+            };
+            return names[category] || '';
+        }
+
+        function removeIncomeRow(btn) {
+            btn.closest('tr').remove();
+            calculateIncome();
+        }
+
+        function addExpenseRow(category) {
+            const tbody = document.getElementById('expensesBody');
+            const newRow = document.createElement('tr');
+            newRow.setAttribute('data-category', category);
+            newRow.innerHTML = `
+                <td></td>
+                <td></td>
+                <td><input type="text" placeholder="بيان المصروف"></td>
+                <td><input type="number" class="expense-amount" data-category="${category}" value="0" onchange="calculateExpenses()"></td>
+                <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
+            `;
+            
+            const allRows = Array.from(tbody.querySelectorAll('tr'));
+            let addButtonRow = null;
+            let foundCategory = false;
+            
+            for (let i = 0; i < allRows.length; i++) {
+                const row = allRows[i];
+                if (row.classList.contains('category-row') && row.textContent.includes(getExpenseCategoryName(category))) {
+                    foundCategory = true;
+                    continue;
+                }
+                if (foundCategory && row.querySelector('.btn-add')) {
+                    addButtonRow = row;
+                    break;
+                }
+            }
+            
+            if (addButtonRow) {
+                tbody.insertBefore(newRow, addButtonRow);
+            }
+        }
+
+        function getExpenseCategoryName(category) {
+            const names = {
+                'transport': 'المواصلات',
+                'housing': 'البيت',
+                'groceries': 'المقاضي',
+                'maintenance': 'صيانة',
+                'entertainment': 'الترفيه',
+                'health': 'الصحة',
+                'education': 'التعليم',
+                'charity': 'الصدقات',
+                'debts': 'الالتزامات',
+                'savings': 'ادخار'
+            };
+            return names[category] || '';
+        }
+
+        function removeExpenseRow(btn) {
+            btn.closest('tr').remove();
+            calculateExpenses();
+        }
+
+        function calculateIncome() {
+            const categories = ['salaries', 'allowances', 'investments', 'others'];
+            let totalMonthly = 0;
+
+            categories.forEach(category => {
+                const inputs = document.querySelectorAll(`.income-amount[data-category="${category}"]`);
+                let categoryTotal = 0;
+                
+                inputs.forEach(input => {
+                    categoryTotal += parseFloat(input.value) || 0;
+                });
+                
+                document.getElementById(`${category}-total`).textContent = categoryTotal.toLocaleString();
+                totalMonthly += categoryTotal;
+            });
+
+            document.getElementById('monthly-income').textContent = totalMonthly.toLocaleString();
+            document.getElementById('yearly-income').textContent = (totalMonthly * 12).toLocaleString();
+            
+            calculateNetSurplus();
+        }
+
+        function calculateExpenses() {
+            const categories = ['transport', 'housing', 'groceries', 'maintenance', 'entertainment', 
+                              'health', 'education', 'charity', 'debts', 'savings'];
+            let totalMonthly = 0;
+
+            categories.forEach(category => {
+                const inputs = document.querySelectorAll(`.expense-amount[data-category="${category}"]`);
+                let categoryTotal = 0;
+                
+                inputs.forEach(input => {
+                    categoryTotal += parseFloat(input.value) || 0;
+                });
+                
+                document.getElementById(`${category}-total`).textContent = categoryTotal.toLocaleString();
+                totalMonthly += categoryTotal;
+            });
+
+            document.getElementById('monthly-expenses').textContent = totalMonthly.toLocaleString();
+            document.getElementById('yearly-expenses').textContent = (totalMonthly * 12).toLocaleString();
+            
+            calculateNetSurplus();
+        }
+
+        function calculateNetSurplus() {
+            const yearlyIncome = parseFloat(document.getElementById('yearly-income').textContent.replace(/,/g, '')) || 0;
+            const yearlyExpenses = parseFloat(document.getElementById('yearly-expenses').textContent.replace(/,/g, '')) || 0;
+            const netSurplus = yearlyIncome - yearlyExpenses;
+            
+            document.getElementById('total-expenses-display').textContent = yearlyExpenses.toLocaleString();
+            document.getElementById('net-surplus').textContent = netSurplus.toLocaleString();
+            
+            const surplusCell = document.getElementById('net-surplus').parentElement;
+            surplusCell.style.color = netSurplus > 0 ? '#28a745' : netSurplus < 0 ? '#dc3545' : '#6c757d';
+        }
+
+        function updateAnalysis() {
+            const yearlyIncome = parseFloat(document.getElementById('yearly-income').textContent.replace(/,/g, '')) || 0;
+            const yearlyExpenses = parseFloat(document.getElementById('yearly-expenses').textContent.replace(/,/g, '')) || 0;
+            
+            if (yearlyIncome === 0 && yearlyExpenses === 0) {
+                document.getElementById('status-text').textContent = 'قم بإدخال بيانات الدخل والمصاريف لعرض التحليل';
+                document.getElementById('status-score').textContent = '';
+                document.getElementById('status-display').className = 'status-indicator';
+                return;
+            }
+            
+            const netSurplus = yearlyIncome - yearlyExpenses;
+            const percentage = (netSurplus / yearlyIncome) * 100;
+            
+            const score = Math.round(percentage / 20);
+            const clampedScore = Math.max(-5, Math.min(5, score));
+            
+            const statusMap = {
+                5: { text: 'ممتاز جداً', class: 'status-excellent', advice: 'استمر في نفس النهج وزد الاستثمارات' },
+                4: { text: 'ممتاز', class: 'status-excellent', advice: 'وضع ممتاز، فكر في فرص استثمارية جديدة' },
+                3: { text: 'جيد جداً', class: 'status-good', advice: 'حافظ على هذا المستوى وراجع خطة الادخار' },
+                2: { text: 'جيد', class: 'status-good', advice: 'حاول زيادة الفائض من خلال تقليل المصاريف غير الضرورية' },
+                1: { text: 'مناسب', class: 'status-good', advice: 'ابحث عن طرق لزيادة الدخل أو تقليل المصاريف' },
+                0: { text: 'متوازن', class: 'status-balanced', advice: 'الوضع متوازن، لكن يحتاج إلى بناء احتياطي للطوارئ' },
+                '-1': { text: 'تراجع', class: 'status-bad', advice: 'راجع المصاريف وابحث عن مصادر دخل إضافية' },
+                '-2': { text: 'غير جيد', class: 'status-bad', advice: 'قلل المصاريف غير الضرورية فوراً' },
+                '-3': { text: 'سيئ', class: 'status-bad', advice: 'أعد هيكلة الميزانية وقلل المصاريف بشكل كبير' },
+                '-4': { text: 'سيئ جداً', class: 'status-critical', advice: 'تدخل عاجل مطلوب - راجع جميع الالتزامات والديون' },
+                '-5': { text: 'يحتاج تدخل عاجل', class: 'status-critical', advice: 'استشر مستشار مالي فوراً وأعد هيكلة الديون' }
+            };
+            
+            const status = statusMap[clampedScore];
+            document.getElementById('status-text').innerHTML = `
+                <div style="font-size: 1.2em; margin-bottom: 10px;">موقف الأسرة: ${status.text}</div>
+                <div style="font-size: 0.9em; opacity: 0.95; line-height: 1.6;">
+                    <strong>التطوير المقترح:</strong> ${status.advice}
+                </div>
+            `;
+            document.getElementById('status-score').textContent = `النتيجة: ${clampedScore > 0 ? '+' : ''}${clampedScore}`;
+            document.getElementById('status-display').className = `status-indicator ${status.class}`;
+        }
+
+
+// ==================== الدالة الأولى: exportToPDF ====================
+
+async function exportToPDF(section) {
+    const element = document.getElementById(section);
+    if (!element) {
+        console.error('❌ القسم غير موجود:', section);
+        return;
+    }
+
+    console.log('🔄 بدء التقاط الصورة للقسم:', section);
+    switchTab(section);
+    
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    loadingOverlay.classList.add('active');
+
+    setTimeout(async () => {
+        try {
+            console.log('📸 بدء html2canvas...');
+            
+            const canvas = await html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: false,
+                logging: true,
+                backgroundColor: '#ffffff',
+                windowWidth: element.scrollWidth,
+                windowHeight: element.scrollHeight
+            });
+
+            console.log('✅ تم إنشاء Canvas:', canvas.width, 'x', canvas.height);
+            
+            if (canvas.width === 0 || canvas.height === 0) {
+                throw new Error('Canvas فارغ');
+            }
+
+            const sectionNames = {
+                'income': 'تحليل_الدخل',
+                'expenses': 'تحليل_المصاريف',
+                'analysis': 'تحليل_موقف_الأسرة'
+            };
+            
+            const today = new Date().toISOString().slice(0, 10);
+            const fileName = 'وزنة_مصاريف_' + sectionNames[section] + '_' + today + '.png';
+
+            // تحويل Canvas إلى Data URL
+            const dataUrl = canvas.toDataURL('image/png', 0.95);
+            
+            console.log('✅ تم إنشاء Data URL، الحجم:', dataUrl.length);
+
+            await saveImageToDevice(dataUrl, fileName, loadingOverlay);
+            
+        } catch (error) {
+            console.error('❌ خطأ في التقاط الصورة:', error);
+            loadingOverlay.classList.remove('active');
+            showErrorMessage('خطأ: ' + error.message);
+        }
+    }, 500);
+}
+
+
+// ==================== الدالة الثانية: saveImageToDevice (الحل الجذري) ====================
+
+async function saveImageToDevice(dataUrl, fileName, loadingOverlay) {
+    console.log('💾 بدء عملية الحفظ...');
+    
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    
+    // ================== للهاتف (Telegram): فتح في متصفح خارجي ==================
+    if (isMobile && tg) {
+        console.log('📱 جهاز محمول + Telegram: فتح في متصفح خارجي');
+        
+        try {
+            // إنشاء HTML صفحة بسيطة
+            var pageContent = '<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8">';
+            pageContent += '<meta name="viewport" content="width=device-width,initial-scale=1">';
+            pageContent += '<title>حفظ الصورة<\/title><style>';
+            pageContent += 'body{margin:0;padding:20px;background:#f5f5f5;font-family:Arial;text-align:center}';
+            pageContent += 'img{max-width:100%;height:auto;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-radius:8px;margin:20px 0}';
+            pageContent += '.box{background:#fff;padding:20px;margin:20px auto;max-width:90%;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}';
+            pageContent += 'h2{color:#333;margin:0 0 15px 0}';
+            pageContent += 'p{color:#666;line-height:1.8;margin:10px 0}';
+            pageContent += 'button{background:#0088cc;color:#fff;border:none;padding:15px 30px;font-size:18px;';
+            pageContent += 'border-radius:8px;cursor:pointer;margin:10px;font-weight:bold}';
+            pageContent += 'button:active{background:#006699}';
+            pageContent += '<\/style><\/head><body>';
+            pageContent += '<div class="box"><h2>💰 وزنة مصاريف<\/h2>';
+            pageContent += '<p><strong>📥 لحفظ الصورة:<\/strong><\/p>';
+            pageContent += '<p style="font-size:16px">١. اضغط مطولاً على الصورة بالأسفل<\/p>';
+            pageContent += '<p style="font-size:16px">٢. اختر "حفظ الصورة" أو "Save Image"<\/p>';
+            pageContent += '<button onclick="tryDownload()">📥 تحميل مباشر<\/button><\/div>';
+            pageContent += '<img src="' + dataUrl + '" alt="Screenshot" id="mainImage">';
+            pageContent += '<script>function tryDownload(){';
+            pageContent += 'var a=document.createElement("a");';
+            pageContent += 'a.href="' + dataUrl + '";';
+            pageContent += 'a.download="' + fileName + '";';
+            pageContent += 'a.click();';
+            pageContent += 'setTimeout(function(){alert("إذا لم يبدأ التحميل، اضغط مطولاً على الصورة واختر \\"حفظ الصورة\\"");},500);';
+            pageContent += '}<\/script><\/body><\/html>';
+            
+            // تحويل إلى Blob وإنشاء URL
+            var blob = new Blob([pageContent], { type: 'text/html' });
+            var pageUrl = URL.createObjectURL(blob);
+            
+            // فتح في متصفح خارجي
+            console.log('🌐 فتح الرابط في المتصفح الخارجي...');
+            tg.openLink(pageUrl);
+            
+            loadingOverlay.classList.remove('active');
+            
+            setTimeout(function() {
+                tg.showAlert('✅ تم فتح صفحة التحميل في المتصفح!\n\n📥 اضغط مطولاً على الصورة واختر "حفظ الصورة"\n\n💡 أو استخدم زر "تحميل مباشر"');
+            }, 300);
+            
+            return;
+            
+        } catch (error) {
+            console.error('❌ فشل فتح المتصفح الخارجي:', error);
+            // المتابعة للطريقة البديلة
+        }
+    }
+    
+    // ================== للكمبيوتر أو الطريقة البديلة: تحميل مباشر ==================
+    console.log('💻 تحميل مباشر...');
+    
+    try {
+        // تحويل Data URL إلى Blob
+        var arr = dataUrl.split(',');
+        var mime = arr[0].match(/:(.*?);/)[1];
+        var bstr = atob(arr[1]);
+        var n = bstr.length;
+        var u8arr = new Uint8Array(n);
+        
+        while(n--){
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        
+        var blob = new Blob([u8arr], {type: mime});
+        
+        console.log('✅ تم إنشاء Blob، الحجم:', (blob.size / 1024).toFixed(2), 'KB');
+        
+        // إنشاء رابط التحميل
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.style.display = 'none';
+        
+        // إضافة للصفحة والنقر
+        document.body.appendChild(link);
+        link.click();
+        
+        // تنظيف
+        setTimeout(function() {
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }, 100);
+        
+        loadingOverlay.classList.remove('active');
+        
+        if (tg && tg.showAlert) {
+            tg.showAlert('✅ تم بدء التحميل!\n\nابحث عن الصورة في مجلد التنزيلات');
+        } else {
+            alert('✅ تم بدء التحميل! ابحث في مجلد التنزيلات');
+        }
+        
+        console.log('✅ تم التحميل بنجاح');
+        
+    } catch (error) {
+        console.error('❌ فشل التحميل المباشر:', error);
+        loadingOverlay.classList.remove('active');
+        showErrorMessage('فشل الحفظ: ' + error.message);
+    }
+}
+
+
+// ==================== الدالة الثالثة: showSuccessMessage ====================
+
+function showSuccessMessage(customMessage) {
+    var message = customMessage || '✅ تم الحفظ بنجاح!';
+    
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
+        window.Telegram.WebApp.showAlert(message);
+    } else {
+        alert(message);
+    }
+}
+
+
+// ==================== الدالة الرابعة: showErrorMessage ====================
+
+function showErrorMessage(customMessage) {
+    var message = customMessage || '❌ فشل الحفظ';
+    
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
+        window.Telegram.WebApp.showAlert(message);
+    } else {
+        alert(message);
+    }
+}
+
+
+
+        // تهيئة الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            // التحقق من أوقات العمل أولاً
+            if (!checkWorkingHours()) {
+                return; // لا تكمل التحميل إذا كان خارج أوقات العمل
+            }
+            
+            loadTheme();
+            calculateIncome();
+            calculateExpenses();
+            wrapTablesForMobile();
+            initTelegramWebApp();
+            
+            // تفعيل الطرق السرية للوصول إلى لوحة الأدمن
+            setupAdminKeyboardShortcut();  // اختصار لوحة المفاتيح: Ctrl+Shift+A
+            setupAdminClickTrigger();      // النقر 5 مرات في الزاوية
+            checkAdminURL();               // التحقق من رابط ?admin=true
+            
+            // عرض الوقت المتبقي (اختياري)
+            showRemainingTime();
+            
+            // بدء المراقبة الدورية لأوقات العمل
+            startWorkHoursMonitoring();
+        });
+
+        // تهيئة Telegram Web App
+        function initTelegramWebApp() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                const tg = window.Telegram.WebApp;
+                tg.expand();
+                tg.enableClosingConfirmation();
+                tg.ready();
+                
+                if (tg.themeParams.bg_color) {
+                    document.documentElement.style.setProperty('--tg-bg-color', tg.themeParams.bg_color);
+                }
+                
+                console.log('✅ Telegram Web App تم تهيئته بنجاح');
+            }
+        }
+
+        // تغليف الجداول لتحسين العرض على الهواتف
+        function wrapTablesForMobile() {
+            const tables = document.querySelectorAll('table');
+            tables.forEach(table => {
+                if (!table.parentElement.classList.contains('table-wrapper')) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'table-wrapper';
+                    table.parentNode.insertBefore(wrapper, table);
+                    wrapper.appendChild(table);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
