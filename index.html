@@ -607,7 +607,7 @@
 
         <div class="tabs">
             <button class="tab active" onclick="switchTab('income')">مصادر الدخل</button>
-            <button class="tab" onclick="switchTab('expenses')">الميزانية </button>
+            <button class="tab" onclick="switchTab('expenses')">المصروفات</button>
             <button class="tab" onclick="switchTab('analysis')">تحليل الموقف</button>
         </div>
 
@@ -618,7 +618,7 @@
             <table id="incomeTable">
                 <thead>
                     <tr>
-                        <th style="width: 8%">م</th>
+                        <th style="width: 8%">*</th>
                         <th style="width: 25%">نوع الدخل</th>
                         <th style="width: 35%">مصدر الدخل</th>
                         <th style="width: 22%">المبلغ الشهري</th>
@@ -634,7 +634,7 @@
                     <tr data-category="salaries">
                         <td></td>
                         <td></td>
-                        <td><input type="text" placeholder="مصدر الدخل"></td>
+                        <td><input type="text" placeholder="المصدر"></td>
                         <td><input type="number" class="income-amount" data-category="salaries" value="0" onchange="calculateIncome()"></td>
                         <td><button class="btn btn-remove" onclick="removeIncomeRow(this)">حذف</button></td>
                     </tr>
@@ -658,7 +658,7 @@
                     <tr data-category="allowances">
                         <td></td>
                         <td></td>
-                        <td><input type="text" placeholder="مصدر الدخل"></td>
+                        <td><input type="text" placeholder="المصدر"></td>
                         <td><input type="number" class="income-amount" data-category="allowances" value="0" onchange="calculateIncome()"></td>
                         <td><button class="btn btn-remove" onclick="removeIncomeRow(this)">حذف</button></td>
                     </tr>
@@ -682,7 +682,7 @@
                     <tr data-category="investments">
                         <td></td>
                         <td></td>
-                        <td><input type="text" placeholder="مصدر الدخل"></td>
+                        <td><input type="text" placeholder="المصدر"></td>
                         <td><input type="number" class="income-amount" data-category="investments" value="0" onchange="calculateIncome()"></td>
                         <td><button class="btn btn-remove" onclick="removeIncomeRow(this)">حذف</button></td>
                     </tr>
@@ -706,7 +706,7 @@
                     <tr data-category="others">
                         <td></td>
                         <td></td>
-                        <td><input type="text" placeholder="مصدر الدخل"></td>
+                        <td><input type="text" placeholder="المصدر"></td>
                         <td><input type="number" class="income-amount" data-category="others" value="0" onchange="calculateIncome()"></td>
                         <td><button class="btn btn-remove" onclick="removeIncomeRow(this)">حذف</button></td>
                     </tr>
@@ -760,7 +760,7 @@
             <table id="expensesTable">
                 <thead>
                     <tr>
-                        <th style="width: 8%">#</th>
+                        <th style="width: 8%">*</th>
                         <th style="width: 25%">نوع المصروف</th>
                         <th style="width: 35%">بيان المصروف</th>
                         <th style="width: 22%">المبلغ الشهري</th>
@@ -776,7 +776,7 @@
                     <tr data-category="transport">
                         <td></td>
                         <td></td>
-                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="text" placeholder="المصروف"></td>
                         <td><input type="number" class="expense-amount" data-category="transport" value="0" onchange="calculateExpenses()"></td>
                         <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
                     </tr>
@@ -800,7 +800,7 @@
                     <tr data-category="housing">
                         <td></td>
                         <td></td>
-                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="text" placeholder="المصروف"></td>
                         <td><input type="number" class="expense-amount" data-category="housing" value="0" onchange="calculateExpenses()"></td>
                         <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
                     </tr>
@@ -824,7 +824,7 @@
                     <tr data-category="groceries">
                         <td></td>
                         <td></td>
-                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="text" placeholder="المصروف"></td>
                         <td><input type="number" class="expense-amount" data-category="groceries" value="0" onchange="calculateExpenses()"></td>
                         <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
                     </tr>
@@ -848,7 +848,7 @@
                     <tr data-category="maintenance">
                         <td></td>
                         <td></td>
-                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="text" placeholder="المصروف"></td>
                         <td><input type="number" class="expense-amount" data-category="maintenance" value="0" onchange="calculateExpenses()"></td>
                         <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
                     </tr>
@@ -872,7 +872,7 @@
                     <tr data-category="entertainment">
                         <td></td>
                         <td></td>
-                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="text" placeholder="المصروف"></td>
                         <td><input type="number" class="expense-amount" data-category="entertainment" value="0" onchange="calculateExpenses()"></td>
                         <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
                     </tr>
@@ -896,7 +896,7 @@
                     <tr data-category="health">
                         <td></td>
                         <td></td>
-                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="text" placeholder="المصروف"></td>
                         <td><input type="number" class="expense-amount" data-category="health" value="0" onchange="calculateExpenses()"></td>
                         <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
                     </tr>
@@ -920,7 +920,7 @@
                     <tr data-category="education">
                         <td></td>
                         <td></td>
-                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="text" placeholder="المصروف"></td>
                         <td><input type="number" class="expense-amount" data-category="education" value="0" onchange="calculateExpenses()"></td>
                         <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
                     </tr>
@@ -944,7 +944,7 @@
                     <tr data-category="charity">
                         <td></td>
                         <td></td>
-                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="text" placeholder="المصروف"></td>
                         <td><input type="number" class="expense-amount" data-category="charity" value="0" onchange="calculateExpenses()"></td>
                         <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
                     </tr>
@@ -968,7 +968,7 @@
                     <tr data-category="debts">
                         <td></td>
                         <td></td>
-                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="text" placeholder="المصروف"></td>
                         <td><input type="number" class="expense-amount" data-category="debts" value="0" onchange="calculateExpenses()"></td>
                         <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
                     </tr>
@@ -992,7 +992,7 @@
                     <tr data-category="savings">
                         <td></td>
                         <td></td>
-                        <td><input type="text" placeholder="بيان المصروف"></td>
+                        <td><input type="text" placeholder="المصروف"></td>
                         <td><input type="number" class="expense-amount" data-category="savings" value="0" onchange="calculateExpenses()"></td>
                         <td><button class="btn btn-remove" onclick="removeExpenseRow(this)">حذف</button></td>
                     </tr>
